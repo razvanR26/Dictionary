@@ -1,5 +1,6 @@
 package example;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -20,16 +21,23 @@ public class DictClass {
                 System.out.println("To exit the application, enter 0");
 
                 System.out.println("Enter your option:");
-
-                int option = scanner.nextInt();
-                scanner.nextLine();
-
-                running = getValidatedIntegerInput(option);
+                   try {
+                       int option = scanner.nextInt();
+                       scanner.nextLine();
+                       running = getValidatedIntegerInput(option);
+                   } catch (InputMismatchException e) {
+                       System.out.println("Enter a valid option" + "\n");
+                       scanner.nextLine();
+                   }
             }
         }
 
         public boolean getValidatedStringInput (String word) {
-            return word.matches("[A-Za-z -]+");
+            return word.matches("[A-Za-z]+([ -][A-Za-z]+)*");
+        }
+
+        public boolean getValidatedDescriptionInput (String description) {
+            return description.matches(".*[A-Za-z]+.*");
         }
 
         public boolean getValidatedIntegerInput (int option) {
@@ -53,16 +61,27 @@ public class DictClass {
             while (true) {
                 System.out.println("Enter a word that you want to add to the dictionary");
                 String word = scanner.nextLine();
-                if (existsWord(word)) {
-                    System.out.println("The word is already in the dictionary");
+                if (getValidatedStringInput(word)) {
+                    if (existsWord(word)) {
+                        System.out.println("The word is already in the dictionary");
+                    } else {
+                        while (true) {
+                            System.out.println("Enter the description of the word");
+                            String description = scanner.nextLine();
+                            if (getValidatedDescriptionInput(description)) {
+                                dictionary.put(word, description);
+                                System.out.println("The word and its description have been added to the dictionary");
+                                break;
+                            } else {
+                                System.out.println(description + " is invalid. Enter a valid description");
+                            }
+                        }
+                    }
+                    if (!askUserIfWantsToContinue()) {
+                        return;
+                    }
                 } else {
-                    System.out.println("Enter the description of the word");
-                    String description = scanner.nextLine();
-                    dictionary.put(word, description);
-                    System.out.println("The word and its description have been added to the dictionary");
-                }
-                if (!askUserIfWantsToContinue()) {
-                    return;
+                    System.out.println(word + " is invalid. Enter a valid word");
                 }
             }
         }
@@ -76,14 +95,18 @@ public class DictClass {
                 printDict();
                 System.out.println("Enter a word that you want to remove from the dictionary");
                 String word = scanner.nextLine();
-                if (existsWord(word)) {
-                    dictionary.remove(word);
-                    System.out.println("The word and its description were removed from the dictionary");
+                if (getValidatedStringInput(word)) {
+                    if (existsWord(word)) {
+                        dictionary.remove(word);
+                        System.out.println("The word and its description were removed from the dictionary");
+                    } else {
+                        System.out.println("The word is not in the dictionary");
+                    }
+                    if (!askUserIfWantsToContinue()) {
+                        return;
+                    }
                 } else {
-                    System.out.println("The word is not in the dictionary");
-                }
-                if (!askUserIfWantsToContinue()) {
-                    return;
+                    System.out.println(word + " is invalid. Enter a valid word");
                 }
             }
         }
@@ -97,14 +120,25 @@ public class DictClass {
                 printDict();
                 System.out.println("Enter a word that you want to modify");
                 String word = scanner.nextLine();
-                if (existsWord(word)) {
-                    System.out.println("Enter a new description for it");
-                    String description = scanner.nextLine();
-                    dictionary.replace(word, description);
-                    System.out.println("The word now has a new description");
-                } else System.out.println("The word is not in the dictionary");
-                if (!askUserIfWantsToContinue()) {
-                    return;
+                if (getValidatedStringInput(word)) {
+                    if (existsWord(word)) {
+                        while (true) {
+                            System.out.println("Enter a new description for it");
+                            String description = scanner.nextLine();
+                            if (getValidatedDescriptionInput(description)) {
+                                dictionary.replace(word, description);
+                                System.out.println("The word now has a new description");
+                                break;
+                            } else {
+                                System.out.println(description + " is invalid. Enter a valid description");
+                            }
+                        }
+                    } else System.out.println("The word is not in the dictionary");
+                    if (!askUserIfWantsToContinue()) {
+                        return;
+                    }
+                } else {
+                    System.out.println(word + " is invalid. Enter a valid word");
                 }
             }
         }
@@ -117,11 +151,15 @@ public class DictClass {
                 }
                 System.out.println("Enter the word that you are searching for");
                 String word = scanner.nextLine();
-                if (existsWord(word)) {
-                    System.out.println("The word was found and it has this description: " + dictionary.get(word));
-                } else System.out.println("The word is not in the dictionary");
-                if (!askUserIfWantsToContinue()) {
-                    return;
+                if (getValidatedStringInput(word)) {
+                    if (existsWord(word)) {
+                        System.out.println("The word was found and it has this description: " + dictionary.get(word));
+                    } else System.out.println("The word is not in the dictionary");
+                    if (!askUserIfWantsToContinue()) {
+                        return;
+                    }
+                } else {
+                    System.out.println(word + " is invalid. Enter a valid word");
                 }
             }
         }
@@ -140,24 +178,24 @@ public class DictClass {
             System.out.println("1 - Yes");
             System.out.println("0 - No - Back to the menu");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
-
-            if (option == 1) {
-                return true;
+            try {
+                int option = scanner.nextInt();
+                scanner.nextLine();
+                if (option == 1) {
+                    return true;
+                }
+                if (option == 0) {
+                    return false;
+                }
+                System.out.println("Invalid option: " + option);
+            } catch (InputMismatchException e) {
+                System.out.println("Enter a valid option" + "\n");
+                scanner.nextLine();
             }
-
-            if (option == 0) {
-                return false;
-            }
-            System.out.println("Invalid option: " + option);
         }
     }
 
         private boolean existsWord (String word) {
-            if (getValidatedStringInput(word)) {
                 return dictionary.containsKey(word);
-            }
-            return false;
         }
     }
