@@ -24,7 +24,7 @@ public class DictClass {
                    try {
                        int option = scanner.nextInt();
                        scanner.nextLine();
-                       running = getValidatedIntegerInput(option);
+                       running = getValidatedOptionInput(option);
                    } catch (InputMismatchException e) {
                        System.out.println("Enter a valid option" + "\n");
                        scanner.nextLine();
@@ -32,15 +32,16 @@ public class DictClass {
             }
         }
 
-        public boolean getValidatedStringInput (String word) {
-            return word.matches("[A-Za-z]+([ -][A-Za-z]+)*");
+        private boolean getValidatedWordInput (String word) {
+            return word.matches("[A-Za-z]{2,}([ -][A-Za-z]+)*");
         }
 
-        public boolean getValidatedDescriptionInput (String description) {
-            return description.matches(".*[A-Za-z]+.*");
+        private boolean getValidatedDescriptionInput (String description) {
+            return description.matches("[A-Za-z]{2,}(-[A-Za-z]+)?( ([A-Za-z]+(-[A-Za-z]+)?)" +
+                    "| [\\d]+ [A-Za-z]+(-[A-Za-z]+)?)*[.!?]?");
         }
 
-        public boolean getValidatedIntegerInput (int option) {
+        private boolean getValidatedOptionInput (int option) {
             switch (option) {
                 case 1 -> addWords();
                 case 2 -> removeWords();
@@ -57,11 +58,11 @@ public class DictClass {
         }
 
 
-        public void addWords () {
+        private void addWords () {
             while (true) {
                 System.out.println("Enter a word that you want to add to the dictionary");
                 String word = scanner.nextLine();
-                if (getValidatedStringInput(word)) {
+                if (getValidatedWordInput(word)) {
                     if (existsWord(word)) {
                         System.out.println("The word is already in the dictionary");
                     } else {
@@ -86,7 +87,7 @@ public class DictClass {
             }
         }
 
-        public void removeWords () {
+        private void removeWords () {
             while (true) {
                 if (dictionary.isEmpty()) {
                     System.out.println("Dictionary is empty");
@@ -95,7 +96,7 @@ public class DictClass {
                 printDict();
                 System.out.println("Enter a word that you want to remove from the dictionary");
                 String word = scanner.nextLine();
-                if (getValidatedStringInput(word)) {
+                if (getValidatedWordInput(word)) {
                     if (existsWord(word)) {
                         dictionary.remove(word);
                         System.out.println("The word and its description were removed from the dictionary");
@@ -111,7 +112,7 @@ public class DictClass {
             }
         }
 
-        public void changeWords () {
+        private void changeWords () {
             while (true) {
                 if (dictionary.isEmpty()) {
                     System.out.println("Dictionary is empty");
@@ -120,7 +121,7 @@ public class DictClass {
                 printDict();
                 System.out.println("Enter a word that you want to modify");
                 String word = scanner.nextLine();
-                if (getValidatedStringInput(word)) {
+                if (getValidatedWordInput(word)) {
                     if (existsWord(word)) {
                         while (true) {
                             System.out.println("Enter a new description for it");
@@ -143,7 +144,7 @@ public class DictClass {
             }
         }
 
-        public void findWords () {
+        private void findWords () {
             while (true) {
                 if (dictionary.isEmpty()) {
                     System.out.println("Dictionary is empty");
@@ -151,7 +152,7 @@ public class DictClass {
                 }
                 System.out.println("Enter the word that you are searching for");
                 String word = scanner.nextLine();
-                if (getValidatedStringInput(word)) {
+                if (getValidatedWordInput(word)) {
                     if (existsWord(word)) {
                         System.out.println("The word was found and it has this description: " + dictionary.get(word));
                     } else System.out.println("The word is not in the dictionary");
@@ -164,7 +165,7 @@ public class DictClass {
             }
         }
 
-        public void printDict () {
+        private void printDict () {
             if (dictionary.isEmpty()) {
                 System.out.println("Dictionary is empty");
             } else {
@@ -172,7 +173,7 @@ public class DictClass {
             }
         }
 
-    public boolean askUserIfWantsToContinue () {
+    private boolean askUserIfWantsToContinue () {
         while (true) {
             System.out.println("Do you want to repeat the action?");
             System.out.println("1 - Yes");
