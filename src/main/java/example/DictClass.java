@@ -1,8 +1,6 @@
 package example;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
 
 public class DictClass {
         private final TreeMap<String, String> dictionary = new TreeMap <> (String.CASE_INSENSITIVE_ORDER);
@@ -18,6 +16,8 @@ public class DictClass {
                 System.out.println("To modify a word, enter 3");
                 System.out.println("To find a word, enter 4");
                 System.out.println("To display the entire dictionary, enter 5");
+                System.out.println("To display the entire dictionary filtered by length, enter 6");
+                System.out.println("To display words in the dictionary filtered by a fragment, enter 7");
                 System.out.println("To exit the application, enter 0");
 
                 System.out.println("Enter your option:");
@@ -48,6 +48,8 @@ public class DictClass {
                 case 3 -> changeWords();
                 case 4 -> findWords();
                 case 5 -> printDict();
+                case 6 -> filteredPrintDict();
+                case 7 -> searchByFragment();
                 case 0 -> {
                     System.out.println("You have exited the application");
                     return false;
@@ -113,11 +115,11 @@ public class DictClass {
         }
 
         private void changeWords () {
+            if (dictionary.isEmpty()) {
+                System.out.println("Dictionary is empty");
+                return;
+            }
             while (true) {
-                if (dictionary.isEmpty()) {
-                    System.out.println("Dictionary is empty");
-                    return;
-                }
                 printDict();
                 System.out.println("Enter a word that you want to modify");
                 String word = scanner.nextLine();
@@ -145,11 +147,11 @@ public class DictClass {
         }
 
         private void findWords () {
+            if (dictionary.isEmpty()) {
+                System.out.println("Dictionary is empty");
+                return;
+            }
             while (true) {
-                if (dictionary.isEmpty()) {
-                    System.out.println("Dictionary is empty");
-                    return;
-                }
                 System.out.println("Enter the word that you are searching for");
                 String word = scanner.nextLine();
                 if (getValidatedWordInput(word)) {
@@ -169,7 +171,65 @@ public class DictClass {
             if (dictionary.isEmpty()) {
                 System.out.println("Dictionary is empty");
             } else {
-                System.out.println(dictionary);
+                dictionary.forEach((key, value) -> System.out.println("Word: " + key
+                        + ", description: " + value));
+            }
+        }
+
+        private void filteredPrintDict () {
+            if (dictionary.isEmpty()) {
+                System.out.println("Dictionary is empty");
+                return;
+            }
+              while (true) {
+                  try {
+                      System.out.println("Enter the minimum length of words that you want displayed");
+                      System.out.println("The filter displays words with a length strictly greater than the entered number");
+                      int filter = scanner.nextInt();
+                      scanner.nextLine();
+                      List <Map.Entry <String, String>> result = dictionary.entrySet().stream()
+                              .filter(entry -> entry.getKey().length() > filter).toList();
+                      if (result.isEmpty()) {
+                          System.out.println("The dictionary contains no words with a length greater than the one entered");
+                      } else {
+                          System.out.println("Filtered dictionary:");
+                          result.forEach(entry -> System.out.println("Word: " + entry.getKey()
+                                  + ", description: " + entry.getValue()));
+                      }
+                      if (!askUserIfWantsToContinue()) {
+                          return;
+                      }
+                  } catch (InputMismatchException e) {
+                      System.out.println("Length is invalid. It needs a number");
+                      scanner.nextLine();
+                  }
+              }
+        }
+
+        private void searchByFragment () {
+            if (dictionary.isEmpty()) {
+                System.out.println("Dictionary is empty");
+                return;
+            }
+            while (true) {
+                    System.out.println("Enter the fragment that you want to search in the dictionary");
+                    String fragment = scanner.nextLine();
+                    if (fragment.matches("[A-Za-z]+([ -][A-Za-z]+)*|[ -][A-Za-z]+([ -][A-Za-z]+)*|[A-Za-z]+[ -]?")) {
+                        List <Map.Entry<String, String>> result = dictionary.entrySet().stream()
+                                .filter(entry -> entry.getKey().contains(fragment)).toList();
+                        if (result.isEmpty()) {
+                            System.out.println("The dictionary has no words that contain the entered fragment");
+                        } else {
+                            System.out.println("The words that contain the fragment are:");
+                            result.forEach(entry -> System.out.println("Word: " + entry.getKey()
+                                    + ", description: " + entry.getValue()));
+                        }
+                        if (!askUserIfWantsToContinue()) {
+                            return;
+                        }
+                    } else {
+                        System.out.println(fragment + " is invalid. Enter a valid fragment");
+                    }
             }
         }
 
